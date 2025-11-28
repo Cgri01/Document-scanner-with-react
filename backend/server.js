@@ -1,3 +1,4 @@
+const tesseract = require('tesseract.js');
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -54,6 +55,7 @@ app.get("/api/test" , (req , res) => {
 
 //Görüntü işleme fonksiyonu:
 const {createCanvas , loadImage} = require("canvas");
+const { text } = require('stream/consumers');
 
 //Kenar tespit fonksiyonu:
 async function detectEdges(imagePath) {
@@ -91,6 +93,36 @@ async function detectEdges(imagePath) {
             edgesUrl: null
         }
     }
+}
+
+//OCR fonksiyonu:
+async function extractTextFromImage(imagePath) {
+    try {
+        console.log("Starting OCR for image:" , imagePath);
+        const { data : { text , confidence } } = await Tesseract.recognize(
+            imagePath,
+            "eng+tur",
+            { logger : m => console.log("OCR progress:" , m.status) }
+        );
+
+        console.log("OCR completed. Trust score:" , confidence);
+        return {
+            success: true,
+            text: text.trim(),
+            confidence: Math.round(confidence),
+            language: "eng+tur"
+        };
+
+    } catch (error) {
+        console.error("OCR error:" , error);
+        return {
+            success: false,
+            text: "",
+            confidence: 0,
+            error: error.message
+        };
+    }
+    
 }
 
 //Basit görüntü analizi:
@@ -181,12 +213,20 @@ app.post("/api/upload" , upload.single("document") , async(req , res) => {
 
         //Yüklenen dosya bilgileri:
         const uploadedFile = req.file;
+        console.log("File received:" , uploadedFile.originalname);
 
       //   // Burada ileride görüntü işleme yapacağız
       //  // Şimdilik sadece dosya bilgilerini döndürüyoruz
     
       //Goruntu Analizi:
+      console.log("Starting image analysis for:" , uploadedFile.path);
       const analysis = await analyzeImage(uploadedFile.path);
+
+      //OCR işlemi:
+      console.log("Starting OCR for:" , uploadedFile.path);
+      const ocrResult = await extractTextFromImage(uploadedFile.path);
+      console.log("OCR Completed");
+
 
 
         res.json({
@@ -196,13 +236,18 @@ app.post("/api/upload" , upload.single("document") , async(req , res) => {
                 filename: uploadedFile.filename,
                 originalname: uploadedFile.originalname,
                 path: uploadedFile.path,
-                size: uploadedFile.size
+                size: uploadedFile.size,
+                url: `/uploads/${uploadedFile.filename}`
             },
-            analysis: analysis //Analiz sonuçlarını da gönderiyoruz
+            analysis: analysis, //Analiz sonuçlarını da gönderiyoruz
+            ocr: ocrResult
         });
     }catch (error) {
         console.error("Error during file upload: " , error);
-        res.status(500).json({ error: "Internal server error during file upload!!!" });
+        res.status(500).json({ 
+            error: "Internal server error during file upload!!!",
+            details: error.message
+         });
         }
 
     }

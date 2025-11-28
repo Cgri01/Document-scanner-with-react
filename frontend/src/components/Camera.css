@@ -156,3 +156,38 @@
     max-width: 200px;
   }
 }
+
+/* Grid Overlay Stilleri */
+.grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.grid-line.horizontal {
+  left: 10%;
+  right: 10%;
+  height: 1px;
+}
+
+.grid-line.vertical {
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+}
+
+.grid-line.horizontal.top { top: 33%; }
+.grid-line.horizontal.middle { top: 50%; }
+.grid-line.horizontal.bottom { top: 66%; }
+
+.grid-line.vertical.left { left: 33%; }
+.grid-line.vertical.middle { left: 50%; }
+.grid-line.vertical.right { left: 66%; }

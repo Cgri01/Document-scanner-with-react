@@ -286,3 +286,89 @@
   text-align: center;
   margin: 0.5rem 0 0 0;
 }
+
+/* OCR Sonuçları Stilleri */
+.ocr-results {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid #9C27B0;
+}
+
+.ocr-results h4 {
+  margin-top: 0;
+  color: #9C27B0;
+}
+
+.ocr-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.ocr-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ocr-stat strong {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+/* Güven skoru renkleri */
+.confidence-0 { color: #ff4444; } /* 0-20% */
+.confidence-1 { color: #ff8800; } /* 21-40% */
+.confidence-2 { color: #ffbb33; } /* 41-60% */
+.confidence-3 { color: #00C851; } /* 61-80% */
+.confidence-4 { color: #007E33; } /* 81-100% */
+
+/* Tanınan metin alanı */
+.extracted-text {
+  margin: 1.5rem 0;
+}
+
+.extracted-text h5 {
+  color: #E1BEE7;
+  margin-bottom: 0.5rem;
+}
+
+.text-container {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #7B1FA2;
+  border-radius: 6px;
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.recognized-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Courier New', monospace;
+  line-height: 1.5;
+  color: #fff;
+}
+
+.no-text {
+  color: #ff9800;
+  text-align: center;
+  font-style: italic;
+}
+
+.ocr-info {
+  background: rgba(156, 39, 176, 0.1);
+  padding: 0.75rem;
+  border-radius: 6px;
+  border-left: 3px solid #9C27B0;
+}
+
+.ocr-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #E1BEE7;
+}

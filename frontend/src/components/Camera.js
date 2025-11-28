@@ -130,6 +130,18 @@ const Camera = ( {onCapture , onClose} ) => {
                     muted
                     className="camera-video"
                     />
+
+                    {/* Grid Overlay Kamera hizalama için: */}
+                    <div className="grid-overlay">
+                         <div className="grid-line horizontal top"></div>
+                        <div className="grid-line horizontal middle"></div>
+                        <div className="grid-line horizontal bottom"></div>
+                        <div className="grid-line vertical left"></div>
+                        <div className="grid-line vertical middle"></div>
+                        <div className="grid-line vertical right"></div>
+                    </div>
+
+
                     {/* Gizli canvas foto çekmek için */}
                     <canvas ref={canvasRef} style={{display : "none"}} />
 

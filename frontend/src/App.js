@@ -202,6 +202,50 @@ function App() {
 
                   </div>
 
+              {/* OCR Sonucları */}
+              {uploadResult && uploadResult.success && uploadResult.ocr &&  (
+                <div className="ocr-results">
+
+                  <h4>Text Detection Results</h4>
+
+                  <div className="ocr-stats">
+                    <div className="ocr-stat">
+                      <strong>Detection Reliability:</strong>
+                      <span className={`confidence-${Math.floor(uploadResult.ocr.confidence / 20)}`}> 
+                        {uploadResult.ocr.confidence}%
+                      </span>
+                    </div>
+
+                    <div className="ocr-stat">
+                      <strong>Languages:</strong>
+                      <span>{uploadResult.ocr.language || "english"}</span>
+                    </div>
+
+                  </div>
+
+                  {/* Tanınan Metin */}
+                  <div className="extracted-text">
+                    <h5>Extracted Text:</h5>
+                    <div className="text-container">
+                      {uploadResult.ocr.success && uploadResult.ocr.text ? (
+                        <pre className="recognized-text"> {uploadResult.ocr.text} </pre>
+                      ) : (
+                        <p className="no-text"> Text not recognized or text not found in image </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* OCR Bilgisi */}
+                  <div className="ocr-info">
+                    <p> <strong>Note:</strong> OCR accuracy depends on image quality, lighting, and font</p>
+                  </div>
+
+                </div>
+              )}
+              
+
+
+
                   {/* Kenar Tespiti */}
                   {uploadResult.analysis.edgeDetection && uploadResult.analysis.edgeDetection.detected && (
                     <div className="edge-detection-section">
