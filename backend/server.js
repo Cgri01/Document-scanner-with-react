@@ -56,6 +56,7 @@ app.get("/api/test" , (req , res) => {
 //Görüntü işleme fonksiyonu:
 const {createCanvas , loadImage} = require("canvas");
 const { text } = require('stream/consumers');
+const { error } = require('console');
 
 //Kenar tespit fonksiyonu:
 async function detectEdges(imagePath) {
@@ -99,30 +100,100 @@ async function detectEdges(imagePath) {
 async function extractTextFromImage(imagePath) {
     try {
         console.log("Starting OCR for image:" , imagePath);
-        const { data : { text , confidence } } = await Tesseract.recognize(
-            imagePath,
-            "eng+tur",
-            { logger : m => console.log("OCR progress:" , m.status) }
+
+        //Görüntü optimizasyonu:
+        const processedImageBuffer = await sharp(imagePath)
+            .grayscale()
+            .normalise()
+            .sharpen({sigma: 1})
+            .toBuffer();
+
+        const { data } = await tesseract.recognize(
+            processedImageBuffer,
+            "eng+tur", {
+                logger: m => {
+                    if (m.status === "recognizing text") {
+                        console.log(`OCR Progress: %${Math.round(m.progress * 100)}`);
+                    }
+                }
+            }
         );
 
-        console.log("OCR completed. Trust score:" , confidence);
+
+        console.log("OCR completed. Trust score:" , data.confidence);
+        console.log("Text Length: " , data.text.length);
+
+        //Metni temizleme:
+        const cleanedText = data.text
+            .replace(/\n\s*\n/g, '\n') // Fazla boş satırları temizle
+            .replace(/[^\S\n]+/g, ' ') // Fazla boşlukları temizle
+            .trim();
+
+        const languageDetected = detectLanguge(cleanedText);
+
+        //Metin var mı kontrolü:
+        const hasRealText = cleanedText.replace(/[\s\W_]+/g, '').length > 3; 
+
         return {
             success: true,
-            text: text.trim(),
-            confidence: Math.round(confidence),
-            language: "eng+tur"
+            text: cleanedText,
+            confidence: Math.round(data.confidence),
+            language: languageDetected,
+            textLength : cleanedText.length,
+            hasText: hasRealText
         };
 
     } catch (error) {
         console.error("OCR error:" , error);
-        return {
-            success: false,
-            text: "",
-            confidence: 0,
-            error: error.message
-        };
+
+        //Hata durumunda fallback:
+        try{
+            console.log("Trying fallback OCR for image:" , imagePath);
+            const { data } = await tesseract.recognize(imagePath , "eng" );
+            const cleanedText = data.text.trim();
+            const hasRealText = cleanedText.replace(/[\s\W_]+/g, '').length > 3;
+
+             return {
+                success: true,
+                text: cleanedText,
+                confidence: Math.round(data.confidence),
+                language: languageDetected,
+                textLength : cleanedText.length,
+                hasText: hasRealText
+            };
+        } catch (fallbackError) {
+            console.error("Fallback OCR error:" , fallbackError);
+            return {
+                success: false,
+                text: "",
+                confidence: 0,
+                error: "OCR failed " + fallbackError.message,
+                hasText: false
+            };
+        }
+        
+        
     }
+
+
+           
     
+}
+
+//Dil tespit fonksiyonu:
+function detectLanguge(text) {
+    const turkishChars = /[çğıöşüÇĞİÖŞÜ]/;
+    //const englishChars = /[a-zA-Z]/;
+
+    const hasTurkish = turkishChars.test(text);
+    //const hasEnglish = englishChars.test(text);
+
+    if (hasTurkish) {
+        return "Turkish";
+    }
+    else {
+        return "English";
+    }
 }
 
 //Basit görüntü analizi:
